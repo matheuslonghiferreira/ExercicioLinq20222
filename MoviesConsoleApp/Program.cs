@@ -19,10 +19,44 @@ namespace MoviesConsoleApp
             Console.WriteLine();
             Console.WriteLine("1. Listar o nome de todos personagens desempenhados por um determinado ator, incluindo a informação de qual o título do filme e o diretor");
 
+            var querry1 = from per in _db.Characters
+                                             .Include(a => a.Actor)
+                                             .Include(m => m.Movie)
+                          where per.Actor.Name == "Samuel L. Jackson"
+                          select new
+                          {
+                              per.Character,
+                              per.Movie.Title,
+                              per.Movie.Director
+                          };
+
+            foreach (var res in querry1)
+            {
+                Console.WriteLine("\t {0} \t {1} \t {2}", res.Character, res.Title, res.Director);
+            };
 
             Console.WriteLine();
             Console.WriteLine("2. Mostrar o nome e idade de todos atores que desempenharam um determinado personagem(por exemplo, quais os atores que já atuaram como '007' ?");
 
+            var querry2 = from ator in _db.Characters
+                                              .Include(a => a.Actor)
+                          where ator.Character == "James Bond"
+                          select new
+                          {
+                              ator.Actor.Name,
+                              ator.Actor.DateBirth
+                          };
+
+            foreach (var res in querry2)
+            {
+                int idade = DateTime.Now.Year - res.DateBirth.Year;
+                if (DateTime.Now.DayOfYear < res.DateBirth.DayOfYear)
+                {
+                    idade = idade - 1;
+                }
+
+                Console.WriteLine("\t {0} \t {1}", res.Name, idade);
+            };
 
             Console.WriteLine();
             Console.WriteLine("3. Informar qual o ator desempenhou mais vezes um determinado personagem(por exemplo: qual o ator que realizou mais filmes como o 'agente 007'");
