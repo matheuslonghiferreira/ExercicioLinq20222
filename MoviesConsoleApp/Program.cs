@@ -61,23 +61,202 @@ namespace MoviesConsoleApp
             Console.WriteLine();
             Console.WriteLine("3. Informar qual o ator desempenhou mais vezes um determinado personagem(por exemplo: qual o ator que realizou mais filmes como o 'agente 007'");
 
+            var querry3 = from ator2 in _db.Characters
+                                               .Include(a => a.Actor)
+                                               .Include(m => m.Movie)
+                          where ator2.Character == "James Bond"
+                          select new
+                          {
+                              ator2.Character,
+                              ator2.Actor.Name,
+                              ator2.Movie.Title
+                          };
+
+            int numVezes    = 0;
+            String nomeAtor = "";
+
+            foreach (var res in querry3)
+            {
+                int cont = 1;
+
+                foreach (var res2 in querry3)
+                {
+                    if (res.Title != res2.Title)
+                    {
+                        cont = cont + 1;
+                    };
+                };
+
+                if (cont > numVezes)
+                {
+                    numVezes = cont;
+                    nomeAtor = res.Name;
+                };
+            };
+
+            Console.WriteLine("\t {0}", nomeAtor);
+
             Console.WriteLine();
             Console.WriteLine("4. Mostrar o nome e a data de nascimento do ator mais idoso");
+
+            var querry4 = from ator3 in _db.Actors
+                          select new
+                          {
+                              ator3.Name,
+                              ator3.DateBirth
+                          };
+
+            nomeAtor = "";
+            DateTime dataNascimento = DateTime.Now;
+
+            foreach (var res in querry4)
+            {
+                if (res.DateBirth < dataNascimento)
+                {
+                    dataNascimento = res.DateBirth;
+                    nomeAtor = res.Name;
+                };
+            };
+
+            Console.WriteLine("\t {0} \t {1}", nomeAtor, dataNascimento);
 
             Console.WriteLine();
             Console.WriteLine("5. Mostrar o nome e a data de nascimento do ator mais novo a atuar em um determinado gênero");
 
+            var querry5 = from ator4 in _db.Characters
+                                               .Include(a => a.Actor)
+                                               .Include(m => m.Movie)
+                                               .ThenInclude(g => g.Genre)
+                          where ator4.Movie.Genre.Name == "Action"
+                          select new
+                          {
+                              ator4.Actor.Name,
+                              ator4.Actor.DateBirth
+                          };
+
+            nomeAtor = "";
+            dataNascimento = DateTime.Now;
+            int contadorAux = 0;
+
+            foreach (var res in querry5)
+            {
+                if (res.DateBirth > dataNascimento||contadorAux == 0)
+                {
+                    dataNascimento = res.DateBirth;
+                    nomeAtor = res.Name;
+                    contadorAux = contadorAux + 1;
+                };
+            };
+
+            Console.WriteLine("\t {0} \t {1}", nomeAtor, dataNascimento);
+
             Console.WriteLine();
             Console.WriteLine("6. Mostrar o valor médio das avaliações dos filmes de um determinado diretor");
+
+            var querry6 = from val in _db.Movies
+                          where val.Director == "Roger Spottiswoode"
+                          select new
+                          {
+                              val.Title,
+                              val.Rating
+                          };
+
+            contadorAux = 0;
+            double medAvaliacoes = 0;
+
+            foreach (var res in querry6)
+            {
+                contadorAux = contadorAux + 1;
+                medAvaliacoes = medAvaliacoes + res.Rating;
+            };
+
+            medAvaliacoes = medAvaliacoes / contadorAux;
+
+            Console.WriteLine("\t {0}", medAvaliacoes);
 
             Console.WriteLine();
             Console.WriteLine("7. Qual o elenco do filme melhor avaliado ?");
 
+            var querry7 = from elenco in _db.Movies
+                          select new
+                          {
+                              elenco.MovieId,
+                              elenco.Rating
+                          };
+
+            medAvaliacoes = 0;
+            int melhorFilme = 0;
+
+            foreach (var res in querry7)
+            {
+                if (res.Rating > medAvaliacoes)
+                {
+                    medAvaliacoes = res.Rating;
+                    melhorFilme = res.MovieId;
+                };
+            };
+
+            var querry7b = from lista in _db.Characters
+                                                .Include(m => m.Movie)
+                                                .Include(a => a.Actor)
+                           where lista.MovieId == melhorFilme
+                           select new
+                           {
+                               lista.Actor.Name
+                           };
+
+            foreach (var res in querry7b)
+            {
+                Console.WriteLine("\t {0}", res.Name);
+            };
+
             Console.WriteLine();
             Console.WriteLine("8. Qual o elenco do filme com o maior faturamento?");
 
+            var querry8 = from elenco2 in _db.Movies
+                          select new
+                          {
+                              elenco2.MovieId,
+                              elenco2.Gross
+                          };
+
+            melhorFilme = 0;
+            decimal faturamento = 0;
+
+            foreach (var res in querry8)
+            {
+                if (res.Gross > faturamento)
+                {
+                    faturamento = res.Gross;
+                    melhorFilme = res.MovieId;
+                };
+            };
+
+            var querry8b = from lista2 in _db.Characters
+                                                .Include(m => m.Movie)
+                                                .Include(a => a.Actor)
+                           where lista2.MovieId == melhorFilme
+                           select new
+                           {
+                               lista2.Actor.Name
+                           };
+
+            foreach (var res in querry8b)
+            {
+                Console.WriteLine("\t {0}", res.Name);
+            };
+
             Console.WriteLine();
             Console.WriteLine("9. Gerar um relatório de aniversariantes, agrupando os atores pelo mês de aniverário.");
+
+            var querry9 = from aniver in _db.Actors
+                          select new
+                          {
+                              aniver.Name,
+                              aniver.DateBirth,
+                              MesAniver = aniver.DateBirth.Month
+                          };
+
 
             Console.WriteLine("- - -   feito!  - - - ");
             Console.WriteLine();
