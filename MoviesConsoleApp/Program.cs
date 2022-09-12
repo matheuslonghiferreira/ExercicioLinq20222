@@ -249,14 +249,33 @@ namespace MoviesConsoleApp
             Console.WriteLine();
             Console.WriteLine("9. Gerar um relatório de aniversariantes, agrupando os atores pelo mês de aniverário.");
 
-            var querry9 = from aniver in _db.Actors
-                          select new
-                          {
-                              aniver.Name,
-                              aniver.DateBirth,
-                              MesAniver = aniver.DateBirth.Month
-                          };
+            var querry9 = (from aniver in _db.Actors
+                           select new
+                           {
+                               aniver.Name,
+                               aniver.DateBirth,
+                               MesAniver = aniver.DateBirth.Month
+                           }).ToList();
 
+            var querry9b = from e in querry9
+                           group e by e.MesAniver into grp
+                           select new
+                           {
+                               Mes = grp.Key,
+                               Aniversariantes = grp
+                           };
+
+            foreach (var entrada in querry9b)
+            {
+                Console.WriteLine("Mes : " + entrada.Mes);
+
+                foreach (var elem in entrada.Aniversariantes)
+                {
+                    Console.WriteLine("{\t{1} {0}" ,elem.Name, elem.DateBirth);
+
+                }
+
+            }
 
             Console.WriteLine("- - -   feito!  - - - ");
             Console.WriteLine();
